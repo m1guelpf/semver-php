@@ -1,0 +1,23 @@
+[package]
+license = "MIT"
+edition = "2021"
+version = "0.1.0"
+name = "semver-php"
+readme = "README.md"
+authors = ["Miguel Piedrafita <rust@miguel.build>"]
+repository = "https://github.com/m1guelpf/semver-php"
+categories = ["development-tools", "parser-implementations"]
+keywords = ["semver", "version", "composer", "php", "parser"]
+description = "Composer semver parsing and constraint matching for Rust"
+
+[dependencies]
+regex = "1.10"
+thiserror = "2"
+
+[dev-dependencies]
+pretty_assertions = "1.4"
+criterion = { version = "0.8", features = ["html_reports"] }
+
+[[bench]]
+name = "semver_bench"
+harness = false
