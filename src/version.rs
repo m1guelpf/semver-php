@@ -205,16 +205,14 @@ fn compare_parts(a: &str, b: &str) -> Ordering {
 		return Ordering::Equal;
 	}
 	if a.is_empty() {
-		// Empty is less than any non-empty, unless b is a stability marker
-		let b_stability = stability_order(b);
-		if b_stability != 0 {
-			return Ordering::Greater; // "" > "dev", "" > "alpha", etc. but "" < "patch"
+		// "" > "dev", "alpha", "beta", "RC" (with or without a number), but "" < "patch" and any number
+		if stability_order(split_stability_and_number(b).0) < 0 {
+			return Ordering::Greater;
 		}
 		return Ordering::Less;
 	}
 	if b.is_empty() {
-		let a_stability = stability_order(a);
-		if a_stability != 0 {
+		if stability_order(split_stability_and_number(a).0) < 0 {
 			return Ordering::Less;
 		}
 		return Ordering::Greater;
@@ -297,6 +295,19 @@ mod tests {
 		assert_eq!(version_compare("1.0.0-dev", "1.0.0"), Ordering::Less);
 		assert_eq!(version_compare("1.0.0-alpha", "1.0.0-beta"), Ordering::Less);
 		assert_eq!(version_compare("1.0.0-RC", "1.0.0"), Ordering::Less);
+		// A numbered suffix is still a pre-release: "RC1" is "RC" then "1".
+		assert_eq!(version_compare("4.4.0.0-RC1", "4.4.0.0"), Ordering::Less);
+		assert_eq!(version_compare("4.4.0.0", "4.4.0.0-RC1"), Ordering::Greater);
+		assert_eq!(
+			version_compare("28.0.0.0-beta1", "28.0.0.0"),
+			Ordering::Less
+		);
+		assert_eq!(version_compare("1.0.0.0-alpha2", "1.0.0.0"), Ordering::Less);
+		assert_eq!(version_compare("1.0.0.0-dev1", "1.0.0.0"), Ordering::Less);
+		assert_eq!(
+			version_compare("1.0.0.0-patch1", "1.0.0.0"),
+			Ordering::Greater
+		);
 	}
 
 	#[test]
